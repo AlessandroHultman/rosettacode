@@ -1,4 +1,3 @@
-import math
 import colorama
 
 def progress_bar(progress, total):

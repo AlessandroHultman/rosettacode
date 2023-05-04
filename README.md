@@ -18,13 +18,13 @@ The `rccli.py` script can be used to read source code and nothing more from the 
 ## Running the program
 Example use:
 ```
-python rccli.py --task "<task_name>"
+$ python rccli.py --task "<task_name>"
 ```
 The program will create a text file for each programming language scraped for the given task and save it to a directory.
 
 ## Keep LLVM languages
 To only save programming languages that offers support to generate compiled programs as LLVM IR. One can run the program with a simple shell script I wrote and pass the task name as argument.
 ```
-sh run.sh "<task_name>"
+$ sh run.sh "<task_name>"
 ```
 This will only save LLVM languages and replace the text files with each programming language source code file.
