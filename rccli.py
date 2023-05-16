@@ -70,32 +70,6 @@ def scrape_rosetta_code():
 
     response = requests.get(tasks_url)
     soup = BeautifulSoup(response.text, "html.parser")
-    page_links = soup.find_all("a", class_="mw-category-page-link")
-
-    for page_link in page_links:
-        page_url = base_url + page_link["href"]
-        page_response = requests.get(page_url)
-        page_soup = BeautifulSoup(page_response.text, "html.parser")
-        task_links = page_soup.find_all("a", class_="mw-category")
-
-        for task_link in task_links:
-            task_name = task_link.text.strip()
-            scrape_task(task_name)
-
-
-# Scrape a specific task if provided
-if args.task:
-    task_name = args.task
-    scrape_task(task_name)
-    print(f"Scraped task: {task_name}")
-else:
-    # Scrape all tasks
-    print("Scraping tasks from Rosetta Code...")
-
-    # Get the list of all tasks
-    url = "https://rosettacode.org/wiki/Category:Programming_Tasks"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, "html.parser")
     task_links = soup.select("#mw-pages .mw-category-group ul li a")
 
     total_tasks = len(task_links)
@@ -108,4 +82,33 @@ else:
         current_task += 1
         progress_bar(current_task, total_tasks)
 
+    next_page_link = soup.find("a", text="next page")
+
+    while next_page_link is not None:
+        next_page_url = base_url + next_page_link["href"]
+        response = requests.get(next_page_url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        task_links = soup.select("#mw-pages .mw-category-group ul li a")
+
+        total_tasks = len(task_links)
+        current_task = 0
+
+        progress_bar(0, total_tasks)
+        for task_link in task_links:
+            task_name = task_link.text.strip()
+            scrape_task(task_name)
+            current_task += 1
+            progress_bar(current_task, total_tasks)
+
+        next_page_link = soup.find("a", text="next page")
+
+# Scrape a specific task if provided
+if args.task:
+    task_name = args.task
+    scrape_task(task_name)
+    print(f"Scraped task: {task_name}")
+else:
+    # Scrape all tasks
+    print("Scraping tasks from Rosetta Code...")
+    scrape_rosetta_code()
     print("Scraping completed.")
