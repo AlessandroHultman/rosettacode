@@ -20,10 +20,20 @@ def scrape_task(task_name):
     pre_tags = soup.find_all("pre")
 
     supported_languages = {
-        "c", "cpp", "objc", "swift", "d", "rust", "fortran", "ada", "haskell", "kotlin", "julia"
+        "c": ".c",
+        "c++": ".cpp",
+        "rust": ".rs",
+        "haskell": ".hs",
+        "java": ".java"
     }
 
     for pre_tag in pre_tags:
+        div_tag = pre_tag.find_previous("div")
+        if div_tag is not None and div_tag.find("dl"):
+            dt_tag = div_tag.find("dt")
+            if dt_tag is not None and dt_tag.text.strip() == "Output:":
+                continue
+
         h2_tag = pre_tag.find_previous("h2")
         if h2_tag is None:
             continue
@@ -40,15 +50,16 @@ def scrape_task(task_name):
         lang_dir = os.path.join(output_dir, lang)
         os.makedirs(lang_dir, exist_ok=True)
 
-        file_name = f"{task_name}.txt"
+        file_extension = supported_languages[lang.lower()]
+        file_name = f"{task_name}{file_extension}"
         file_path = os.path.join(lang_dir, file_name)
 
         try:
             # Create parent directories recursively if they don't exist
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-            with open(file_path, "w") as f:
-                f.write(code)
+            with open(file_path, "wb") as f:
+                f.write(code.encode("utf-8"))
         except OSError as e:
             print(f"Failed to write file: {file_path}. Error: {str(e)}")
 
